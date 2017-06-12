@@ -40,7 +40,7 @@ char *argv[];
 	
 	int nodes[6]={0,1,2,3,4,5};
 	int request[2][2];
-	int disaster[2]; 
+	int disaster[2], ds, l; 
 	int K = 3;
 		
 	/* Declare and allocate space for the variables and arrays where we
@@ -155,31 +155,27 @@ char *argv[];
 	
 	/********* constraint (1) flow constraint for primary path **********/
 	
-		for (i=0;i<N;i++)
+		for(l=0;l<R;l++)
 			{	
-				for(l=0;l<R;l++)
+				for (i=0;i<N;i++)
 				{
 					fprintf(lpFile, "c%d: ", counter++);
 					for (j=0;j<N;j++)
 					{	if(topologyp[i][j]==1)
-							fprintf(lpFile, "+ X_%d_%d_%d_%d ", i, j, request[l][0], request[l][1]);
+							fprintf(lpFile, "+ X_%d_%d_%d ", i, j, l);
 					}	
 					for (j=0;j<N;j++)
 					{	
 						if(topologyp[j][i]==1)
-							fprintf(lpFile, "- X_%d_%d_%d_%d ", j, i, request[l][0], request[l][1]);
+							fprintf(lpFile, "- X_%d_%d_%d ", j, i, l);
 					}	
-					if (i==request[l][0])
+					if (i== 0)
 					{
 						fprintf(lpFile, " = 1  \n");
 					}
 					else if (i==request[l][1])
 					{
-						for(d=0; d< sizeof(datacenter) ; d++)
-						{
-						if(i == datacenter[d])
-							fprintf(lpFile, " + A_%d_%d_%d = 0 \n", datacenter[d] , request[l][0], request[l][1]);
-						}
+						fprintf(lpFile, " = -1 \n");
 					}
 					else
 					{
