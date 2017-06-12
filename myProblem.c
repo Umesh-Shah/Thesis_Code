@@ -67,7 +67,7 @@ char *argv[];
 	srand(time(NULL));
 
 	//read in topology
-	if((inputFile=fopen("topology.txt","r"))==NULL)
+	if((inputFile=fopen("topology_6.txt","r"))==NULL)
 	{	printf("Input file can not be opened.\n");
 		exit(2);
 	}
@@ -214,9 +214,7 @@ char *argv[];
 					}
 				}
 			}
-	
-	/********* constraint (2) flow constraint for backup path **********/
-	
+		
 	
 
 	fprintf(lpFile,"\nEnd\n");
@@ -356,37 +354,37 @@ char *argv[];
 			
 		/* Write out the solution */
 
-	    	colname = (char *) (malloc (10));
+	    	// colname = (char *) (malloc (10));
 
-		for (num = 0; num < cur_numcols; num++)
-		{
-			if ((value[num] != 0)&& (value[num] > SMALL_F))
-			{
-				strcpy(colname,"");
-				colname = cur_colname[num];
-				ch = colname[0];
+		// for (num = 0; num < cur_numcols; num++)
+		// {
+			// if ((value[num] != 0)&& (value[num] > SMALL_F))
+			// {
+				// strcpy(colname,"");
+				// colname = cur_colname[num];
+				// ch = colname[0];
 
-				if (ch == 'T' || ch == 'G' || ch == 'R' || ch == 'f')
-					fprintf(outFile, "%-16s= %f\n", cur_colname[num],value[num]);
-				if( ch == 'X')
-				{	fprintf(outFile, "\n%s:", cur_colname[num]);
-					tokenPtr=strtok(colname,"X");
-					strcpy(s,"");
-					strcat(s,tokenPtr);
-					tokenPtr=strtok(s,"_");
-					strcpy(s1,"");
-					strcat(s1,tokenPtr);
-					i=atoi(s1);
-					tokenPtr=strtok(NULL,"_");
-					strcpy(s1,"");
-					strcat(s1,tokenPtr);
-					j=atoi(s1);
+				// if (ch == 'T' || ch == 'G' || ch == 'R' || ch == 'f')
+					// fprintf(outFile, "%-16s= %f\n", cur_colname[num],value[num]);
+				// if( ch == 'X')
+				// {	fprintf(outFile, "\n%s:", cur_colname[num]);
+					// tokenPtr=strtok(colname,"X");
+					// strcpy(s,"");
+					// strcat(s,tokenPtr);
+					// tokenPtr=strtok(s,"_");
+					// strcpy(s1,"");
+					// strcat(s1,tokenPtr);
+					// i=atoi(s1);
+					// tokenPtr=strtok(NULL,"_");
+					// strcpy(s1,"");
+					// strcat(s1,tokenPtr);
+					// j=atoi(s1);
 
-					fprintf(outFile, "Relay node %d uses the link %d-->%d to relay node %d\n", i,i,j,j);
-				}
+					// fprintf(outFile, "Relay node %d uses the link %d-->%d to relay node %d\n", i,i,j,j);
+				// }
 
-			} /*end of value==1*/
-		}  /*end of for*/
+			// } /*end of value==1*/
+		// }  /*end of for*/
 	
 	fclose(outFile);
 
