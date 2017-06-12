@@ -38,10 +38,9 @@ char *argv[];
 	char ch,*tokenPtr,s[30],s1[30];
 	char lpFileName[50],solutionFileName[50];
 	
-	int nodes[14]={0,1,2,3,4,5,6,7,8,9,10,11,12,13};
-	int request[4][2];
-	int datacenter[2],disaster[2], con[4]; 
-	int ds = 2,l,d;
+	int nodes[6]={0,1,2,3,4,5};
+	int request[2][2];
+	int disaster[2]; 
 	int K = 3;
 		
 	/* Declare and allocate space for the variables and arrays where we
@@ -91,33 +90,7 @@ char *argv[];
 	{	printf("Solution file can not be opened.\n");
 		exit(2);
 	}
-	
-	
-	/****************read input datacenter set************/	
-	// For reading the datacenter set 
-	 file1 = fopen("datacenter.txt","r");
-	 if(file1 == NULL)
-	 {
-		printf("error\n");
-		return 1;
-	 }
-	 for (i=0;i<ds;i++)
-	 {
-		 datacenter[i]= -1;
-	 }
-	 for (i=0;i<ds;i++)
-	 {
-		fscanf(file1, "%d", &datacenter[i]);
-	 }
-	 fclose(file1);
-	
-	// Debugging datacenter//
-	 for (i=0;i<ds;i++)
-	 {
-		printf("%d ", datacenter[i]);
-		printf("\n");
-	 }
-	 
+		 
 		 
 	/****************read input disaster set************/	
 	// For reading the disaster set 
