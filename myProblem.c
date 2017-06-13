@@ -40,8 +40,7 @@ char *argv[];
 	
 	int nodes[6]={0,1,2,3,4,5};
 	int request[2][2];
-	int disaster[2], ds, l; 
-	int K = 3;
+	int disaster[2], ds, l, k; 
 		
 	/* Declare and allocate space for the variables and arrays where we
         will store the optimization results including the status, objective
@@ -153,7 +152,7 @@ char *argv[];
 	}
 	fprintf (lpFile, "\nSubject to \n");
 	
-	/********* constraint (1) flow constraint for primary path **********/
+	/********* constraint (2) flow constraint for primary path **********/
 	
 		for(l=0;l<R;l++)
 			{	
@@ -184,8 +183,83 @@ char *argv[];
 				}
 			}
 		
+	/********* constraint (3) optical reach **********/
 	
+		for(l=0;l<R;l++)
+			{
+				for (i=0;i<N;i++)
+				{
+					fprintf(lpFile, "c%d: ", counter++);
+					for (j=0;j<N;j++)
+					{
+						fprintf(lpFile, " + L_%d_%d * X_%d_%d_%d ", i, j, i, j, l);
+					}
+					fprintf(lpFile,"- %d <= 0 \n", D);
+				}
+			}
+			
+	/********* constraint (4) & (5) Computing weight of nodes **********/
+	
+	// constraint (4)
+		for(l=0;l<R;l++)
+			{	
+				for (i=0;i<N;i++)
+				{
+					for (j=0;j<N;j++)
+					{
+						fprintf(lpFile, "c%d: ", counter++);
+						fprintf(lpFile, " w_%d - X_%d_%d_%d >= 0 \n", i, i, j, l);
+					}
+				}
+			}
+	
+	// constraint (5)
+		for(l=0;l<R;l++)
+			{	
+				for (i=0;i<N;i++)
+				{
+					fprintf(lpFile, "c%d: ", counter++);
+					fprintf(lpFile, " w_%d ", i);
+					for (j=0;j<N;j++)
+					{
+						fprintf(lpFile, "- X_%d_%d_%d ", i, j, l);
+					}
+					fprintf(lpFile, " <= 0 \n");
+				}
+			}
+		
 
+	/********* constraint (6) & (7) wavelength continuity constraint **********/
+	
+	// constraint (6)
+		for(l=0;l<R;l++)
+		{
+			for(k=0;k<K;k++)
+			{
+				for (i=0;i<N;i++)
+				{
+					for (j=0;j<N;j++)
+					{
+						fprintf(lpFile, "c%d: ", counter++);
+						fprintf(lpFile, " c_%d_%d_%d * X_%d_%d_%d + U_%d_%d -1 <= 0 \n", i, j, k, i, j, l, k, l);
+					}					
+				}
+			}
+		}
+	
+	
+	// constraint (8)
+		for(l=0;l<R;l++)
+		{
+			fprintf(lpFile, "c%d: ", counter++);
+			for(k=0;k<K;k++)
+			{
+				fprintf(lpFile, " + U_%d_%d ", k, l);
+			}
+			fprintf(lpFile, " -1 <= 0 \n");
+		}
+	
+	
 	fprintf(lpFile,"\nEnd\n");
 
 	fclose(lpFile);
