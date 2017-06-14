@@ -248,7 +248,7 @@ char *argv[];
 		}
 	
 	
-	// constraint (8)
+	// constraint (7)
 		for(l=0;l<R;l++)
 		{
 			fprintf(lpFile, "c%d: ", counter++);
@@ -258,7 +258,58 @@ char *argv[];
 			}
 			fprintf(lpFile, " -1 <= 0 \n");
 		}
+		
+	/********* constraint (8), (9) & (10) used to determine value of u_i_j_k_r **********/
 	
+	// constraint (8)
+		for(l=0;l<R;l++)
+		{
+			for(k=0;k<K;k++)
+			{
+				for (i=0;i<N;i++)
+				{
+					for (j=0;j<N;j++)
+					{
+						fprintf(lpFile, "c%d: ", counter++);
+						fprintf(lpFile, " U_%d_%d_%d_%d  - U_%d_%d  <= 0 \n", i, j, k, l, k, l);
+					}					
+				}
+			}
+		}
+		
+	// constraint (9)
+		for(l=0;l<R;l++)
+		{
+			for(k=0;k<K;k++)
+			{
+				for (i=0;i<N;i++)
+				{
+					for (j=0;j<N;j++)
+					{
+						fprintf(lpFile, "c%d: ", counter++);
+						fprintf(lpFile, " U_%d_%d_%d_%d  - X_%d_%d_%d  <= 0 \n", i, j, k, l, i, j, l);
+					}					
+				}
+			}
+		}
+		
+	// constraint (10)
+		for(l=0;l<R;l++)
+		{
+			for(k=0;k<K;k++)
+			{
+				for (i=0;i<N;i++)
+				{
+					for (j=0;j<N;j++)
+					{
+						fprintf(lpFile, "c%d: ", counter++);
+						fprintf(lpFile, " U_%d_%d_%d_%d - U_%d_%d - X_%d_%d_%d +1 >= 0 \n", i, j, k, l, k, l, i, j, l);
+					}					
+				}
+			}
+		}
+		
+			
 	
 	fprintf(lpFile,"\nEnd\n");
 
