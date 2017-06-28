@@ -20,8 +20,9 @@ CPXLPptr lp;
 
 // start to define your variables and function propypes here
 
-#define N  6  // 6 nodes	
+#define N  7  // 6 nodes + 1 virtual node
+#define E 26 //16 unidirectional edges + 10 virtual edges	
 #define W  8	// Link capacity
-#define D  2500 // Optical reach
+#define OR  1000 // Optical reach
 #define K  4 // No of Channels
-#define R 4 // No of request 
+#define R 2 // No of request 

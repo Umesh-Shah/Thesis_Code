@@ -38,10 +38,11 @@ char *argv[];
 	char ch,*tokenPtr,s[30],s1[30];
 	char lpFileName[50],solutionFileName[50];
 	
-	int nodes[6]={0,1,2,3,4,5};
+	int nodes[7]={0,1,2,3,4,5,6};
 	int request[2][2];
-	int disaster[2], ds, l, k; 
-		
+	int disaster[2], ds, l, m, k; 
+	int edgesArray[N][N]={0};	
+  int c[E][K]={0};
 	/* Declare and allocate space for the variables and arrays where we
         will store the optimization results including the status, objective
         value, and variable values. */
@@ -54,13 +55,13 @@ char *argv[];
 	lp=NULL;
 
 	int solstat;
-    	double objval;
-    	int surplus;
-    	char **cur_colname = NULL;
-    	char *cur_colnamestore = NULL;
-    	int cur_colnamespace;
-    	int num;
-   	int cur_numcols;
+	double objval;
+	int surplus;
+	char **cur_colname = NULL;
+	char *cur_colnamestore = NULL;
+	int cur_colnamespace;
+	int num;
+	int cur_numcols;
 
 	srand(time(NULL));
 
@@ -73,6 +74,11 @@ char *argv[];
 	for(i=0;i<N;i++)
 		for (j = 0; j < N; j++)
 			fscanf(inputFile,"%d",&topologyp[i][j]);
+      
+  
+  for(i=0;i<N;i++)
+		for (j = 0; j < N; j++)
+			fscanf(inputFile,"%d",&edgesArray[i][j]);
 	
 	fclose (inputFile);
 
@@ -125,13 +131,14 @@ char *argv[];
 		printf("error\n");
 		return 1;
 	 }
-	 for (i=0;i<4;i++)
+	 
+	 for (i=0;i<2;i++)
 	 {
 		 for (j = 0; j < 2; j++)
 			request[i][j]=0;
 	 }
 	 
-	 for (i=0;i<4;i++)
+	 for (i=0;i<2;i++)
 	 {
 		for (j = 0; j < 2; j++)
 			fscanf(file2,"%d",&request[i][j]);
@@ -160,15 +167,15 @@ char *argv[];
 				{
 					fprintf(lpFile, "c%d: ", counter++);
 					for (j=0;j<N;j++)
-					{	if(topologyp[i][j]==1)
-							fprintf(lpFile, "+ X_%d_%d_%d ", i, j, l);
+					{	if(topologyp[i][j]!=0)
+							fprintf(lpFile, "+ X_%d_%d_%d ", i, j, request[l][1]);
 					}	
 					for (j=0;j<N;j++)
 					{	
-						if(topologyp[j][i]==1)
-							fprintf(lpFile, "- X_%d_%d_%d ", j, i, l);
+						if(topologyp[j][i]!=0)
+							fprintf(lpFile, "- X_%d_%d_%d ", j, i, request[l][1]);
 					}	
-					if (i== 0)
+					if (i==0)
 					{
 						fprintf(lpFile, " = 1  \n");
 					}
@@ -186,16 +193,15 @@ char *argv[];
 	/********* constraint (3) optical reach **********/
 	
 		for(l=0;l<R;l++)
+			for (i=1;i<N;i++)
 			{
-				for (i=0;i<N;i++)
-				{
-					fprintf(lpFile, "c%d: ", counter++);
-					for (j=0;j<N;j++)
+				fprintf(lpFile, "c%d: ", counter++);
+				for (j=1;j<N;j++)
+					if(topologyp[j][i]!=0)
 					{
-						fprintf(lpFile, " + L_%d_%d * X_%d_%d_%d ", i, j, i, j, l);
+						fprintf(lpFile, " + %d X_%d_%d_%d ", topologyp[i][j], i, j, request[l][1]);
 					}
-					fprintf(lpFile,"- %d <= 0 \n", D);
-				}
+					fprintf(lpFile," <= %d \n", OR);
 			}
 			
 	/********* constraint (4) & (5) Computing weight of nodes **********/
@@ -208,7 +214,7 @@ char *argv[];
 					for (j=0;j<N;j++)
 					{
 						fprintf(lpFile, "c%d: ", counter++);
-						fprintf(lpFile, " w_%d - X_%d_%d_%d >= 0 \n", i, i, j, l);
+						fprintf(lpFile, " w_%d - X_%d_%d_%d >= 0 \n", i, 0, j, request[l][1]);
 					}
 				}
 			}
@@ -222,41 +228,34 @@ char *argv[];
 					fprintf(lpFile, " w_%d ", i);
 					for (j=0;j<N;j++)
 					{
-						fprintf(lpFile, "- X_%d_%d_%d ", i, j, l);
+						fprintf(lpFile, "- X_%d_%d_%d ", 0, j, request[l][1]);
 					}
 					fprintf(lpFile, " <= 0 \n");
 				}
 			}
 		
-
 	/********* constraint (6) & (7) wavelength continuity constraint **********/
 	
 	// constraint (6)
 		for(l=0;l<R;l++)
-		{
 			for(k=0;k<K;k++)
-			{
 				for (i=0;i<N;i++)
-				{
 					for (j=0;j<N;j++)
-					{
-						fprintf(lpFile, "c%d: ", counter++);
-						fprintf(lpFile, " c_%d_%d_%d * X_%d_%d_%d + U_%d_%d -1 <= 0 \n", i, j, k, i, j, l, k, l);
-					}					
-				}
-			}
-		}
-	
-	
+						if(topologyp[j][i]!=0)
+						{
+							fprintf(lpFile, "c%d: ", counter++);
+							fprintf(lpFile, " %d X_%d_%d_%d + U_%d_%d <= 1 \n", c[edgesArray[i][j]][k], i, j, request[l][1], k, request[l][1]);
+						}					
+
 	// constraint (7)
 		for(l=0;l<R;l++)
 		{
 			fprintf(lpFile, "c%d: ", counter++);
 			for(k=0;k<K;k++)
 			{
-				fprintf(lpFile, " + U_%d_%d ", k, l);
+				fprintf(lpFile, " + U_%d_%d ", k, request[l][1]);
 			}
-			fprintf(lpFile, " -1 <= 0 \n");
+			fprintf(lpFile, " <= 1 \n");
 		}
 		
 	/********* constraint (8), (9) & (10) used to determine value of u_i_j_k_r **********/
@@ -270,9 +269,12 @@ char *argv[];
 				{
 					for (j=0;j<N;j++)
 					{
-						fprintf(lpFile, "c%d: ", counter++);
-						fprintf(lpFile, " U_%d_%d_%d_%d  - U_%d_%d  <= 0 \n", i, j, k, l, k, l);
-					}					
+						if(topologyp[j][i]!=0)
+						{
+							fprintf(lpFile, "c%d: ", counter++);
+							fprintf(lpFile, " U_%d_%d_%d_%d  - U_%d_%d  <= 0 \n", i, j, k, request[l][1], k, request[l][1]);
+						}	
+					}				
 				}
 			}
 		}
@@ -286,8 +288,11 @@ char *argv[];
 				{
 					for (j=0;j<N;j++)
 					{
-						fprintf(lpFile, "c%d: ", counter++);
-						fprintf(lpFile, " U_%d_%d_%d_%d  - X_%d_%d_%d  <= 0 \n", i, j, k, l, i, j, l);
+						if(topologyp[j][i]!=0)
+						{
+							fprintf(lpFile, "c%d: ", counter++);
+							fprintf(lpFile, " U_%d_%d_%d_%d  - X_%d_%d_%d  <= 0 \n", i, j, k, request[l][1], i, j, request[l][1]);
+                        }
 					}					
 				}
 			}
@@ -302,13 +307,67 @@ char *argv[];
 				{
 					for (j=0;j<N;j++)
 					{
-						fprintf(lpFile, "c%d: ", counter++);
-						fprintf(lpFile, " U_%d_%d_%d_%d - U_%d_%d - X_%d_%d_%d +1 >= 0 \n", i, j, k, l, k, l, i, j, l);
+						if(topologyp[j][i]!=0)
+						{
+							fprintf(lpFile, "c%d: ", counter++);
+							fprintf(lpFile, " U_%d_%d_%d_%d - U_%d_%d - X_%d_%d_%d >= -1 \n", i, j, k, request[l][1], k, request[l][1], i, j, request[l][1]);
+                        }
 					}					
 				}
 			}
 		}
 		
+	/********* constraint (11) wavelength continuity clash constraint **********/
+		for(l=0;l<R;l++)
+		{
+			for(m=0;m<R;m++)
+			{
+				for(k=0;k<K;k++)
+				{
+					for (i=0;i<N;i++)
+					{
+						for (j=0;j<N;j++)
+						{
+							if(topologyp[j][i]!=0)
+							{
+								if(l!=m)
+								{
+									fprintf(lpFile, "c%d: ", counter++);
+									fprintf(lpFile, " U_%d_%d_%d_%d + U_%d_%d_%d_%d <= 1\n", i, j, k, request[l][1], i, j, k, request[m][1]);
+                                }
+							}
+						}
+					}
+				}
+			}
+		}
+	
+	fprintf(lpFile,"\nBounds\n");
+ 
+	for (i=0;i<N;i++)
+		for (j=0;j<N;j++)
+   if(topologyp[j][i]!=0)
+		  for (k=0; k<K; k++)
+        for(l=0;l<R;l++)
+        fprintf(lpFile, "0 <= U_%d_%d_%d_%d <= 1\n", i, j, k, request[l][1]);
+ 
+ 
+  fprintf(lpFile,"\nBinaries\n");
+  for(l=0;l<R;l++)
+		for (i=0;i<N;i++)
+  		for (j=0;j<N;j++)
+         if(topologyp[j][i]!=0)
+            fprintf(lpFile, "X_%d_%d_%d \n", i, j, request[l][1]);
+        
+  for(l=0;l<R;l++)
+		for (k=0; k<K; k++)
+        fprintf(lpFile, "U_%d_%d \n", k, request[l][1]);
+        
+  for (i=0;i<N;i++)
+    fprintf(lpFile, "w_%d \n", i);
+    
+  
+    
 			
 	
 	fprintf(lpFile,"\nEnd\n");
@@ -389,6 +448,7 @@ char *argv[];
 		solution_time = (double)(endTime - startTime)/(double)CLOCKS_PER_SEC;
 
 		fprintf(outFile, "Objective value = %f\nSolution time = %0.3f s\n", objval,solution_time);
+		printf("Objective value = %f\nSolution time = %0.3f s\n", objval,solution_time);
 
 		/* The size of the problem should be obtained by asking CPLEX what the
 		   actual size is. cur_numcols stores the current number of columns */
@@ -448,37 +508,21 @@ char *argv[];
 			
 		/* Write out the solution */
 
-	    	// colname = (char *) (malloc (10));
+	    	colname = (char *) (malloc (10));
 
-		// for (num = 0; num < cur_numcols; num++)
-		// {
-			// if ((value[num] != 0)&& (value[num] > SMALL_F))
-			// {
-				// strcpy(colname,"");
-				// colname = cur_colname[num];
-				// ch = colname[0];
+		for (num = 0; num < cur_numcols; num++)
+		{
+			if ((value[num] != 0))
+			{
+				strcpy(colname,"");
+				colname = cur_colname[num];
+				ch = colname[0];
 
-				// if (ch == 'T' || ch == 'G' || ch == 'R' || ch == 'f')
-					// fprintf(outFile, "%-16s= %f\n", cur_colname[num],value[num]);
-				// if( ch == 'X')
-				// {	fprintf(outFile, "\n%s:", cur_colname[num]);
-					// tokenPtr=strtok(colname,"X");
-					// strcpy(s,"");
-					// strcat(s,tokenPtr);
-					// tokenPtr=strtok(s,"_");
-					// strcpy(s1,"");
-					// strcat(s1,tokenPtr);
-					// i=atoi(s1);
-					// tokenPtr=strtok(NULL,"_");
-					// strcpy(s1,"");
-					// strcat(s1,tokenPtr);
-					// j=atoi(s1);
-
-					// fprintf(outFile, "Relay node %d uses the link %d-->%d to relay node %d\n", i,i,j,j);
-				// }
-
-			// } /*end of value==1*/
-		// }  /*end of for*/
+				if (ch == 'c' || ch == 'w' || ch == 'U' || ch == 'X')
+					fprintf(outFile, "%-16s= %f\n", cur_colname[num],value[num]);
+			
+			}/*end of value==1*/
+		}  /*end of for*/
 	
 	fclose(outFile);
 
