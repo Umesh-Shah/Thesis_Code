@@ -194,16 +194,20 @@ char *argv[];
 	/********* constraint (3) optical reach **********/
 	
 		for(l=0;l<R;l++)
+		{
+			fprintf(lpFile, "c%d: ", counter++);
 			for (i=1;i<N;i++)
 			{
-				fprintf(lpFile, "c%d: ", counter++);
 				for (j=1;j<N;j++)
+				{
 					if(topologyp[i][j]!=0)
 					{
 						fprintf(lpFile, " + %d X_%d_%d_%d ", topologyp[i][j], i, j, l);
 					}
-					fprintf(lpFile," <= %d \n", OR);
+				}
 			}
+			fprintf(lpFile," <= %d \n", OR);
+		}
 			
 	/********* constraint (4) & (5) Computing weight of nodes **********/
 	
