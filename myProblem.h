@@ -25,4 +25,4 @@ CPXLPptr lp;
 #define W  8	// Link capacity
 #define OR  1000 // Optical reach
 #define K  4 // No of Channels
-#define R 2 // No of request 
+#define R 3 // No of request 

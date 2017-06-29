@@ -42,7 +42,8 @@ char *argv[];
 	int request[2][2];
 	int disaster[2], ds, l, m, k; 
 	int edgesArray[N][N]={0};	
-  int c[E][K]={0};
+	int c[E][K]={0};
+	
 	/* Declare and allocate space for the variables and arrays where we
         will store the optimization results including the status, objective
         value, and variable values. */
@@ -132,13 +133,13 @@ char *argv[];
 		return 1;
 	 }
 	 
-	 for (i=0;i<2;i++)
+	 for (i=0;i<R;i++)
 	 {
 		 for (j = 0; j < 2; j++)
 			request[i][j]=0;
 	 }
 	 
-	 for (i=0;i<2;i++)
+	 for (i=0;i<R;i++)
 	 {
 		for (j = 0; j < 2; j++)
 			fscanf(file2,"%d",&request[i][j]);
@@ -168,12 +169,12 @@ char *argv[];
 					fprintf(lpFile, "c%d: ", counter++);
 					for (j=0;j<N;j++)
 					{	if(topologyp[i][j]!=0)
-							fprintf(lpFile, "+ X_%d_%d_%d ", i, j, request[l][1]);
+							fprintf(lpFile, "+ X_%d_%d_%d ", i, j, l);
 					}	
 					for (j=0;j<N;j++)
 					{	
 						if(topologyp[j][i]!=0)
-							fprintf(lpFile, "- X_%d_%d_%d ", j, i, request[l][1]);
+							fprintf(lpFile, "- X_%d_%d_%d ", j, i, l);
 					}	
 					if (i==0)
 					{
@@ -197,9 +198,9 @@ char *argv[];
 			{
 				fprintf(lpFile, "c%d: ", counter++);
 				for (j=1;j<N;j++)
-					if(topologyp[j][i]!=0)
+					if(topologyp[i][j]!=0)
 					{
-						fprintf(lpFile, " + %d X_%d_%d_%d ", topologyp[i][j], i, j, request[l][1]);
+						fprintf(lpFile, " + %d X_%d_%d_%d ", topologyp[i][j], i, j, l);
 					}
 					fprintf(lpFile," <= %d \n", OR);
 			}
@@ -209,15 +210,13 @@ char *argv[];
 	// constraint (4)
 		for(l=0;l<R;l++)
 			{	
-				for (i=0;i<N;i++)
-				{
-					for (j=0;j<N;j++)
+			for (j=1;j<N;j++)
 					{
 						fprintf(lpFile, "c%d: ", counter++);
-						fprintf(lpFile, " w_%d - X_%d_%d_%d >= 0 \n", i, 0, j, request[l][1]);
+						fprintf(lpFile, " w_%d - X_%d_%d_%d >= 0 \n", j, 0, j, l);
 					}
-				}
 			}
+			
 	
 	// constraint (5)
 		for(l=0;l<R;l++)
@@ -228,7 +227,7 @@ char *argv[];
 					fprintf(lpFile, " w_%d ", i);
 					for (j=0;j<N;j++)
 					{
-						fprintf(lpFile, "- X_%d_%d_%d ", 0, j, request[l][1]);
+						fprintf(lpFile, "- X_%d_%d_%d ", 0, j, l);
 					}
 					fprintf(lpFile, " <= 0 \n");
 				}
@@ -241,10 +240,10 @@ char *argv[];
 			for(k=0;k<K;k++)
 				for (i=0;i<N;i++)
 					for (j=0;j<N;j++)
-						if(topologyp[j][i]!=0)
+						if(topologyp[i][j]!=0)
 						{
 							fprintf(lpFile, "c%d: ", counter++);
-							fprintf(lpFile, " %d X_%d_%d_%d + U_%d_%d <= 1 \n", c[edgesArray[i][j]][k], i, j, request[l][1], k, request[l][1]);
+							fprintf(lpFile, " %d X_%d_%d_%d + U_%d_%d <= 1 \n", c[edgesArray[i][j]][k], i, j, l, k, l);
 						}					
 
 	// constraint (7)
@@ -253,7 +252,7 @@ char *argv[];
 			fprintf(lpFile, "c%d: ", counter++);
 			for(k=0;k<K;k++)
 			{
-				fprintf(lpFile, " + U_%d_%d ", k, request[l][1]);
+				fprintf(lpFile, " + U_%d_%d ", k, l);
 			}
 			fprintf(lpFile, " <= 1 \n");
 		}
@@ -272,7 +271,7 @@ char *argv[];
 						if(topologyp[j][i]!=0)
 						{
 							fprintf(lpFile, "c%d: ", counter++);
-							fprintf(lpFile, " U_%d_%d_%d_%d  - U_%d_%d  <= 0 \n", i, j, k, request[l][1], k, request[l][1]);
+							fprintf(lpFile, " U_%d_%d_%d_%d  - U_%d_%d  <= 0 \n", i, j, k, l, k, l);
 						}	
 					}				
 				}
@@ -291,7 +290,7 @@ char *argv[];
 						if(topologyp[j][i]!=0)
 						{
 							fprintf(lpFile, "c%d: ", counter++);
-							fprintf(lpFile, " U_%d_%d_%d_%d  - X_%d_%d_%d  <= 0 \n", i, j, k, request[l][1], i, j, request[l][1]);
+							fprintf(lpFile, " U_%d_%d_%d_%d  - X_%d_%d_%d  <= 0 \n", i, j, k, l, i, j, l);
                         }
 					}					
 				}
@@ -310,7 +309,7 @@ char *argv[];
 						if(topologyp[j][i]!=0)
 						{
 							fprintf(lpFile, "c%d: ", counter++);
-							fprintf(lpFile, " U_%d_%d_%d_%d - U_%d_%d - X_%d_%d_%d >= -1 \n", i, j, k, request[l][1], k, request[l][1], i, j, request[l][1]);
+							fprintf(lpFile, " U_%d_%d_%d_%d - U_%d_%d - X_%d_%d_%d >= -1 \n", i, j, k, l, k, l, i, j, l);
                         }
 					}					
 				}
@@ -333,7 +332,7 @@ char *argv[];
 								if(l!=m)
 								{
 									fprintf(lpFile, "c%d: ", counter++);
-									fprintf(lpFile, " U_%d_%d_%d_%d + U_%d_%d_%d_%d <= 1\n", i, j, k, request[l][1], i, j, k, request[m][1]);
+									fprintf(lpFile, " U_%d_%d_%d_%d + U_%d_%d_%d_%d <= 1\n", i, j, k, l, i, j, k, m);
                                 }
 							}
 						}
@@ -349,7 +348,7 @@ char *argv[];
    if(topologyp[j][i]!=0)
 		  for (k=0; k<K; k++)
         for(l=0;l<R;l++)
-        fprintf(lpFile, "0 <= U_%d_%d_%d_%d <= 1\n", i, j, k, request[l][1]);
+        fprintf(lpFile, "0 <= U_%d_%d_%d_%d <= 1\n", i, j, k, l);
  
  
   fprintf(lpFile,"\nBinaries\n");
@@ -357,11 +356,11 @@ char *argv[];
 		for (i=0;i<N;i++)
   		for (j=0;j<N;j++)
          if(topologyp[j][i]!=0)
-            fprintf(lpFile, "X_%d_%d_%d \n", i, j, request[l][1]);
+            fprintf(lpFile, "X_%d_%d_%d \n", i, j, l);
         
   for(l=0;l<R;l++)
 		for (k=0; k<K; k++)
-        fprintf(lpFile, "U_%d_%d \n", k, request[l][1]);
+        fprintf(lpFile, "U_%d_%d \n", k, l);
         
   for (i=0;i<N;i++)
     fprintf(lpFile, "w_%d \n", i);
