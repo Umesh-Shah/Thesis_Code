@@ -1,0 +1,45 @@
+Objective value = 2.000000
+Solution time = 1.406 s
+w_1             = 1.000000
+w_2             = 1.000000
+
+X_0_0_1: Lightpath 0 uses the link 0-->1
+
+X_0_1_4: Lightpath 0 uses the link 1-->4
+
+X_0_4_5: Lightpath 0 uses the link 4-->5
+
+X_1_0_1: Lightpath 1 uses the link 0-->1
+
+X_1_1_2: Lightpath 1 uses the link 1-->2
+
+X_2_0_2: Lightpath 2 uses the link 0-->2
+
+X_2_2_3: Lightpath 2 uses the link 2-->3
+
+X_2_3_6: Lightpath 2 uses the link 3-->6
+
+X_3_0_2: Lightpath 3 uses the link 0-->2
+
+X_3_2_4: Lightpath 3 uses the link 2-->4
+
+X_4_0_2: Lightpath 4 uses the link 0-->2
+
+X_4_2_3: Lightpath 4 uses the link 2-->3
+V_0_4           = 1.000000
+V_1_2           = 1.000000
+V_2_0           = 1.000000
+V_2_3           = 1.000000
+V_3_1           = 1.000000
+U_0_4_0_2       = 1.000000
+U_0_4_2_3       = 1.000000
+U_1_2_0_2       = 1.000000
+U_1_2_2_3       = 1.000000
+U_1_2_3_6       = 1.000000
+U_2_0_0_1       = 1.000000
+U_2_0_1_4       = 1.000000
+U_2_0_4_5       = 1.000000
+U_2_3_0_2       = 1.000000
+U_2_3_2_4       = 1.000000
+U_3_1_0_1       = 1.000000
+U_3_1_1_2       = 1.000000

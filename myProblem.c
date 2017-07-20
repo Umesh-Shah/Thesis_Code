@@ -31,17 +31,18 @@ char *argv[];
 {	int i,j,src,content,r,counter=0;
 	int topologyp[N][N]; // for storing the neighbours.
 	
-	FILE *inputFile, *outFile, *lpFile, *file, *file1, *file2, *file3;
+	FILE *inputFile, *outFile, *lpFile, *file, *file1, *file2, *file3, *info;
 
 	time_t startTime,endTime;
 	double solution_time;
 	char ch,*tokenPtr,s[30],s1[30];
-	char lpFileName[50],solutionFileName[50];
+	char lpFileName[50],solutionFileName[50], infoFileName[50];
 	
 	int nodes[7]={0,1,2,3,4,5,6};
 	int request[2][2];
 	int disaster[2], ds, l, m, k; 
-	int edgesArray[N][N]={0};	
+	int edgesArray[N][N]={0};
+	int primaryInfo[R][N]={0};
 	int c[E][K]={0};
 	
 	/* Declare and allocate space for the variables and arrays where we
@@ -96,7 +97,13 @@ char *argv[];
 	{	printf("Solution file can not be opened.\n");
 		exit(2);
 	}
+	
+	sprintf(infoFileName, "LightpathInfo.txt");
 		 
+	if((info=fopen(infoFileName,"w"))==NULL)
+	{	printf("Lightpath Info file can not be opened.\n");
+		exit(2);
+	}
 		 
 	/****************read input disaster set************/	
 	// For reading the disaster set 
@@ -153,226 +160,174 @@ char *argv[];
 	
 	fprintf (lpFile, "Minimize\n obj: \n");
 	
-	for(i =0; i<N; i++)
-	{
+	for(i=1; i<N; i++)
 		fprintf(lpFile, "+ w_%d ", i);
 		
-	}
+	
 	fprintf (lpFile, "\nSubject to \n");
 	
 	/********* constraint (2) flow constraint for primary path **********/
 	
 		for(l=0;l<R;l++)
-			{	
 				for (i=0;i<N;i++)
 				{
 					fprintf(lpFile, "c%d: ", counter++);
 					for (j=0;j<N;j++)
-					{	if(topologyp[i][j]!=0)
-							fprintf(lpFile, "+ X_%d_%d_%d ", i, j, l);
-					}	
+						if(topologyp[i][j]!=0)
+							fprintf(lpFile, "+ X_%d_%d_%d ", l, i, j);
+				
 					for (j=0;j<N;j++)
-					{	
 						if(topologyp[j][i]!=0)
-							fprintf(lpFile, "- X_%d_%d_%d ", j, i, l);
-					}	
+							fprintf(lpFile, "- X_%d_%d_%d ", l, j, i);
+                                            
 					if (i==0)
-					{
 						fprintf(lpFile, " = 1  \n");
-					}
 					else if (i==request[l][1])
-					{
 						fprintf(lpFile, " = -1 \n");
-					}
 					else
-					{
 						fprintf(lpFile, " = 0 \n");
-					}
 				}
-			}
+
 		
 	/********* constraint (3) optical reach **********/
 	
 		for(l=0;l<R;l++)
 		{
 			fprintf(lpFile, "c%d: ", counter++);
-			for (i=1;i<N;i++)
-			{
-				for (j=1;j<N;j++)
-				{
+			for (i=0;i<N;i++)
+				for (j=0;j<N;j++)
 					if(topologyp[i][j]!=0)
 					{
-						fprintf(lpFile, " + %d X_%d_%d_%d ", topologyp[i][j], i, j, l);
+						fprintf(lpFile, " + %d X_%d_%d_%d ", topologyp[i][j], l, i, j);
 					}
-				}
-			}
 			fprintf(lpFile," <= %d \n", OR);
 		}
 			
 	/********* constraint (4) & (5) Computing weight of nodes **********/
 	
 	// constraint (4)
-		for(l=0;l<R;l++)
-			{	
-			for (j=1;j<N;j++)
-					{
-						fprintf(lpFile, "c%d: ", counter++);
-						fprintf(lpFile, " w_%d - X_%d_%d_%d >= 0 \n", j, 0, j, l);
-					}
+	for(l=0;l<R;l++)
+			for (i=1;i<N;i++)
+			{
+				fprintf(lpFile, "c%d: ", counter++);
+				fprintf(lpFile, " w_%d - X_%d_%d_%d >= 0 \n", i, l, 0, i);
 			}
-			
 	
 	// constraint (5)
-		for(l=0;l<R;l++)
-			{	
-				for (i=0;i<N;i++)
-				{
-					fprintf(lpFile, "c%d: ", counter++);
-					fprintf(lpFile, " w_%d ", i);
-					for (j=0;j<N;j++)
-					{
-						fprintf(lpFile, "- X_%d_%d_%d ", 0, j, l);
-					}
-					fprintf(lpFile, " <= 0 \n");
+			
+		for (i=1;i<N;i++)
+		{
+			fprintf(lpFile, "c%d: ", counter++);
+			fprintf(lpFile, " w_%d ", i);
+       for(l=0;l<R;l++)
+  			{
+						fprintf(lpFile, "- X_%d_%d_%d ", l, 0, i);
 				}
-			}
+      fprintf(lpFile, " <= 0 \n");
+    }
+
 		
 	/********* constraint (6) & (7) wavelength continuity constraint **********/
 	
 	// constraint (6)
-		for(l=0;l<R;l++)
-			for(k=0;k<K;k++)
+	for(k=0;k<K;k++)
+    for(l=0;l<R;l++)
 				for (i=0;i<N;i++)
 					for (j=0;j<N;j++)
 						if(topologyp[i][j]!=0)
 						{
 							fprintf(lpFile, "c%d: ", counter++);
-							fprintf(lpFile, " %d X_%d_%d_%d + U_%d_%d <= 1 \n", c[edgesArray[i][j]][k], i, j, l, k, l);
+							fprintf(lpFile, " %d X_%d_%d_%d + V_%d_%d <= 1 \n", c[edgesArray[i][j]][k], l, i, j, k, l);
 						}					
 
 	// constraint (7)
-		for(l=0;l<R;l++)
-		{
-			fprintf(lpFile, "c%d: ", counter++);
+	for(l=0;l<R;l++)
+  {
+	  fprintf(lpFile, "c%d: ", counter++);
 			for(k=0;k<K;k++)
 			{
-				fprintf(lpFile, " + U_%d_%d ", k, l);
+				fprintf(lpFile, " + V_%d_%d ", k, l);
 			}
-			fprintf(lpFile, " <= 1 \n");
-		}
+			fprintf(lpFile, " = 1 \n");
+	}
 		
 	/********* constraint (8), (9) & (10) used to determine value of u_i_j_k_r **********/
 	
 	// constraint (8)
-		for(l=0;l<R;l++)
-		{
-			for(k=0;k<K;k++)
-			{
+	for(k=0;k<K;k++)
+    for(l=0;l<R;l++)
 				for (i=0;i<N;i++)
-				{
 					for (j=0;j<N;j++)
-					{
-						if(topologyp[j][i]!=0)
+						if(topologyp[i][j]!=0)
 						{
 							fprintf(lpFile, "c%d: ", counter++);
-							fprintf(lpFile, " U_%d_%d_%d_%d  - U_%d_%d  <= 0 \n", i, j, k, l, k, l);
+							fprintf(lpFile, " U_%d_%d_%d_%d  - V_%d_%d  <= 0 \n", k, l, i, j, k, l);
 						}	
-					}				
-				}
-			}
-		}
+
 		
 	// constraint (9)
-		for(l=0;l<R;l++)
-		{
-			for(k=0;k<K;k++)
-			{
-				for (i=0;i<N;i++)
-				{
-					for (j=0;j<N;j++)
+	for(k=0;k<K;k++)
+    for(l=0;l<R;l++)
+			for (i=0;i<N;i++)
+				for (j=0;j<N;j++)
+					if(topologyp[i][j]!=0)
 					{
-						if(topologyp[j][i]!=0)
-						{
-							fprintf(lpFile, "c%d: ", counter++);
-							fprintf(lpFile, " U_%d_%d_%d_%d  - X_%d_%d_%d  <= 0 \n", i, j, k, l, i, j, l);
-                        }
-					}					
-				}
-			}
-		}
+						fprintf(lpFile, "c%d: ", counter++);
+						fprintf(lpFile, " U_%d_%d_%d_%d  - X_%d_%d_%d  <= 0 \n", k, l, i, j, l, i, j);
+          }
+
 		
 	// constraint (10)
-		for(l=0;l<R;l++)
-		{
-			for(k=0;k<K;k++)
-			{
+	for(k=0;k<K;k++)
+    for(l=0;l<R;l++)
 				for (i=0;i<N;i++)
-				{
 					for (j=0;j<N;j++)
-					{
-						if(topologyp[j][i]!=0)
+						if(topologyp[i][j]!=0)
 						{
 							fprintf(lpFile, "c%d: ", counter++);
-							fprintf(lpFile, " U_%d_%d_%d_%d - U_%d_%d - X_%d_%d_%d >= -1 \n", i, j, k, l, k, l, i, j, l);
-                        }
-					}					
-				}
-			}
-		}
-		
+							fprintf(lpFile, " U_%d_%d_%d_%d - V_%d_%d - X_%d_%d_%d >= -1 \n", k, l, i, j, k, l, l, i, j);
+            }
+
 	/********* constraint (11) wavelength continuity clash constraint **********/
-		for(l=0;l<R;l++)
-		{
-			for(m=0;m<R;m++)
-			{
-				for(k=0;k<K;k++)
-				{
-					for (i=0;i<N;i++)
-					{
-						for (j=0;j<N;j++)
-						{
-							if(topologyp[j][i]!=0)
-							{
-								if(l!=m)
-								{
+	  for(k=0;k<K;k++)
+      for(l=0;l<R;l++)
+  			for(m=0;m<R;m++)
+          if(l != m)
+  					for (i=0;i<N;i++)
+  						for (j=0;j<N;j++)
+  							if(topologyp[i][j]!=0)
+  							{
 									fprintf(lpFile, "c%d: ", counter++);
-									fprintf(lpFile, " U_%d_%d_%d_%d + U_%d_%d_%d_%d <= 1\n", i, j, k, l, i, j, k, m);
-                                }
-							}
-						}
-					}
-				}
-			}
-		}
+									fprintf(lpFile, " U_%d_%d_%d_%d + U_%d_%d_%d_%d <= 1\n", k, l, i, j, k, m, i, j);
+                }
+
 	
+ /*************** BOUNDS *****************************/
 	fprintf(lpFile,"\nBounds\n");
- 
-	for (i=0;i<N;i++)
-		for (j=0;j<N;j++)
-   if(topologyp[j][i]!=0)
-		  for (k=0; k<K; k++)
-        for(l=0;l<R;l++)
-        fprintf(lpFile, "0 <= U_%d_%d_%d_%d <= 1\n", i, j, k, l);
+  for(k=0; k<K; k++)
+   for(l=0;l<R;l++)
+	  for (i=0;i<N;i++)
+	    for (j=0;j<N;j++)
+       if(topologyp[i][j]!=0)
+          fprintf(lpFile, "0 <= U_%d_%d_%d_%d <= 1\n", k, l, i, j);
  
  
   fprintf(lpFile,"\nBinaries\n");
   for(l=0;l<R;l++)
-		for (i=0;i<N;i++)
-  		for (j=0;j<N;j++)
-         if(topologyp[j][i]!=0)
-            fprintf(lpFile, "X_%d_%d_%d \n", i, j, l);
+		for(i=0;i<N;i++)
+  		for(j=0;j<N;j++)
+         if(topologyp[i][j]!=0)
+            fprintf(lpFile, "X_%d_%d_%d \n", l, i, j);
         
   for(l=0;l<R;l++)
 		for (k=0; k<K; k++)
-        fprintf(lpFile, "U_%d_%d \n", k, l);
+        fprintf(lpFile, "V_%d_%d \n", k, l);
         
-  for (i=0;i<N;i++)
+  for (i=1;i<N;i++)
     fprintf(lpFile, "w_%d \n", i);
     
   
-    
-			
-	
+   
 	fprintf(lpFile,"\nEnd\n");
 
 	fclose(lpFile);
@@ -521,12 +476,54 @@ char *argv[];
 				colname = cur_colname[num];
 				ch = colname[0];
 
-				if (ch == 'c' || ch == 'w' || ch == 'U' || ch == 'X')
+				if (ch == 'w' || ch == 'U' || ch == 'V')
 					fprintf(outFile, "%-16s= %f\n", cur_colname[num],value[num]);
+				
+				if( ch == 'X')
+				{	
+        
+					fprintf(outFile, "\n%s: ", cur_colname[num]);
+					tokenPtr=strtok(colname,"X");
+					strcpy(s,"");
+					strcat(s,tokenPtr);
+					tokenPtr=strtok(s,"_");
+					strcpy(s1,"");
+					strcat(s1,tokenPtr);
+					l=atoi(s1);
+					tokenPtr=strtok(NULL,"_");
+					strcpy(s1,"");
+					strcat(s1,tokenPtr);
+					i=atoi(s1);
+					tokenPtr=strtok(NULL,"_");
+					strcpy(s1,"");
+					strcat(s1,tokenPtr);
+					j=atoi(s1);
+					fprintf(outFile, "Lightpath %d uses the link %d-->%d\n", l, i, j);
+					
+					for (k=0; k<N; k++)
+					{
+						if(k==l)
+						{
+							if(i==0 && k>0)
+							{
+								fprintf(info,"\n");
+							}
+							primaryInfo[l][k] = i;
+							primaryInfo[l][k+1] = j;
+							fprintf(info,"%d ",primaryInfo[l][k]);
+							//printf("%d ",primaryInfo[l][k]);
+						}
+					}
+				}
 			
 			}/*end of value==1*/
 		}  /*end of for*/
+		
+		
+		
+			
 	
+	fclose(info);
 	fclose(outFile);
 
 	free_and_null((char **) &value);
