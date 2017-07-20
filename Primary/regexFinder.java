@@ -28,7 +28,7 @@ public class regexFinder
 
 		while (scanner1.hasNextInt())
 		{
-			for (i = 0; i < nodes; i++)
+			for (i = 0; i < request; i++)
 			{
 				for (j = 0; j < nodes; j++)
 					a[i][j] = scanner1.nextInt();
@@ -38,7 +38,7 @@ public class regexFinder
 		// print the input matrix
 
 		System.out.println("The input sorted matrix is : ");
-		for (i = 0; i < nodes; i++)
+		for (i = 0; i < request; i++)
 		{
 			for (j = 0; j < nodes; j++)
 			{
@@ -56,7 +56,7 @@ public class regexFinder
 
 				// for ( i = 0; i < line.length(); i++) {
 				Pattern p = Pattern.compile(
-						"(X)\\w([0-9]\\d*)\\w([0-9]\\d*)\\w([0-9]\\d*)"); // the
+						"(X)\\w([0-9]\\d*)\\w([0-9]\\d*)\\w([0-9]\\d*)");
 
 				Pattern p1 = Pattern.compile("(V)\\w([0-9]\\d*)\\w([0-9]\\d*)");
 
