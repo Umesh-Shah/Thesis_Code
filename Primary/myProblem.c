@@ -2,7 +2,7 @@
 /*************************************************
 File:   myProblem.c
 Written by: Umesh Shah
-Date modified: ??????
+Date modified: July 28th 2017
 
 (1) To compile this program, please type: make
 (2) To run this program, please type: ./myProblem
@@ -40,9 +40,9 @@ char *argv[];
 	
 	int nodes[7]={0,1,2,3,4,5,6};
 	int request[2][2];
-	int disaster[2], ds, l, m, k; 
+	int disaster[2], ds, l, m, k, temp = 0, counterx = 0; 
 	int edgesArray[N][N]={0};
-	int primaryInfo[R][N]={0};
+	int primaryInfo[R][N];
 	int c[E][K]={0};
 	
 	/* Declare and allocate space for the variables and arrays where we
@@ -77,14 +77,31 @@ char *argv[];
 		for (j = 0; j < N; j++)
 			fscanf(inputFile,"%d",&topologyp[i][j]);
       
-  
-  for(i=0;i<N;i++)
+	fclose (inputFile);
+	
+	if((file1=fopen("edgesNumbers.txt","r"))==NULL)
+	{	printf("Input file can not be opened.\n");
+		exit(2);
+	}
+	
+	for(i=0;i<N;i++)
 		for (j = 0; j < N; j++)
 			fscanf(inputFile,"%d",&edgesArray[i][j]);
 	
-	fclose (inputFile);
+	fclose (file1);
 
 	sprintf(lpFileName, "lpFile.txt");
+	
+	if((file=fopen("PrimaryInfo.txt","r"))==NULL)
+	{	printf("PrimaryInfo file can not be opened.\n");
+		exit(2);
+	}
+	
+	for(i=0;i<R;i++)
+		for(j=0;j<N;j++)
+		{
+			fscanf(file,"%d",&primaryInfo[i][j]);
+		}
 
 	if((lpFile=fopen(lpFileName,"w"))==NULL)
 	{	printf("LP file can not be opened.\n");
@@ -286,7 +303,7 @@ char *argv[];
 						{
 							fprintf(lpFile, "c%d: ", counter++);
 							fprintf(lpFile, " U_%d_%d_%d_%d - V_%d_%d - X_%d_%d_%d >= -1 \n", k, l, i, j, k, l, l, i, j);
-            }
+						}
 
 	/********* constraint (11) wavelength continuity clash constraint **********/
 	  for(k=0;k<K;k++)
@@ -299,7 +316,7 @@ char *argv[];
   							{
 									fprintf(lpFile, "c%d: ", counter++);
 									fprintf(lpFile, " U_%d_%d_%d_%d + U_%d_%d_%d_%d <= 1\n", k, l, i, j, k, m, i, j);
-                }
+							}
 
 	
  /*************** BOUNDS *****************************/
@@ -475,8 +492,9 @@ char *argv[];
 				strcpy(colname,"");
 				colname = cur_colname[num];
 				ch = colname[0];
-
-				if (ch == 'w' || ch == 'U' || ch == 'V')
+                
+				//if(flag ==1)  //primary work
+				if (ch == 'w' || ch == 'U')
 					fprintf(outFile, "%-16s= %f\n", cur_colname[num],value[num]);
 				
 				if( ch == 'X')
@@ -499,29 +517,53 @@ char *argv[];
 					strcat(s1,tokenPtr);
 					j=atoi(s1);
 					fprintf(outFile, "Lightpath %d uses the link %d-->%d\n", l, i, j);
-					
-					for (k=0; k<N; k++)
-					{
-						if(k==l)
+				
+					if(temp!=l)
 						{
-							if(i==0 && k>0)
-							{
-								fprintf(info,"\n");
-							}
-							primaryInfo[l][k] = i;
-							primaryInfo[l][k+1] = j;
-							fprintf(info,"%d ",primaryInfo[l][k]);
-							//printf("%d ",primaryInfo[l][k]);
+							counterx = 0;
 						}
-					}
+					primaryInfo[l][counterx] = i;
+					primaryInfo[l][counterx+1] = j;
+					fprintf(info,"%d ",primaryInfo[l][k]);
+					//printf("%d ",primaryInfo[l][k]);
+					
+					counterx++;
+					temp = l;
+				
+				}
+				
+				if( ch == 'V')
+				{
+					
+					fprintf(outFile, "\n%s: ", cur_colname[num]);
+					tokenPtr=strtok(colname,"V");
+					strcpy(s,"");
+					strcat(s,tokenPtr);
+					tokenPtr=strtok(s,"_");
+					strcpy(s1,"");
+					strcat(s1,tokenPtr);
+					i=atoi(s1);
+					tokenPtr=strtok(NULL,"_");
+					strcpy(s1,"");
+					strcat(s1,tokenPtr);
+					j=atoi(s1);
+					fprintf(outFile, "Lightpath %d uses channel %d\n", i, j);
+					
+					primaryInfo[i][6]=j;
 				}
 			
 			}/*end of value==1*/
 		}  /*end of for*/
 		
-		
-		
-			
+
+	for(i=0;i<R;i++)
+	{
+		for(j=0;j<N;j++)
+		{
+			printf("%d ",primaryInfo[i][j]);
+		}
+		printf("\n");
+	}		
 	
 	fclose(info);
 	fclose(outFile);

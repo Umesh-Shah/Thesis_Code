@@ -1,5 +1,5 @@
 Objective value = 2.000000
-Solution time = 1.406 s
+Solution time = 2.136 s
 w_1             = 1.000000
 w_2             = 1.000000
 
@@ -26,11 +26,16 @@ X_3_2_4: Lightpath 3 uses the link 2-->4
 X_4_0_2: Lightpath 4 uses the link 0-->2
 
 X_4_2_3: Lightpath 4 uses the link 2-->3
-V_0_4           = 1.000000
-V_1_2           = 1.000000
-V_2_0           = 1.000000
-V_2_3           = 1.000000
-V_3_1           = 1.000000
+
+V_0_4: Lightpath 0 uses channel 4
+
+V_1_2: Lightpath 1 uses channel 2
+
+V_2_0: Lightpath 2 uses channel 0
+
+V_2_3: Lightpath 2 uses channel 3
+
+V_3_1: Lightpath 3 uses channel 1
 U_0_4_0_2       = 1.000000
 U_0_4_2_3       = 1.000000
 U_1_2_0_2       = 1.000000

@@ -21,7 +21,6 @@ CPXLPptr lp;
 
 #define N 7 	 // 6 nodes + 1 virtual node
 #define E 22 	//16 unidirectional edges + 6 virtual edges	
-#define W 8	// Link capacity
 #define OR 1000 // Optical reach
 #define K 4 	// No of Channels
 #define R 5 	// No of request 
