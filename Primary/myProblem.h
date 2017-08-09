@@ -20,7 +20,9 @@ CPXLPptr lp;
 // start to define your variables and function propypes here
 
 #define N 7 	 // 6 nodes + 1 virtual node
-#define E 22 	//16 unidirectional edges + 6 virtual edges	
-#define OR 1000 // Optical reach
-#define K 4 	// No of Channels
-#define R 5 	// No of request 
+#define M 14     // twice the size of nodes for printing lighpaths
+#define E 22     // 16 unidirectional edges + 6 virtual edges	
+#define OR 1000  // Optical reach
+#define K 4 	 // No of Channels
+#define R 5 	 // No of requests
+#define D 2 	 // No of disasters 

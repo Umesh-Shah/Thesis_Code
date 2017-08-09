@@ -29,6 +29,7 @@ char *argv[];
 
 #endif
 {	int i,j,src,content,r,counter=0;
+	int duplicate = 0;
 	int topologyp[N][N]; // for storing the neighbours.
 	
 	FILE *inputFile, *outFile, *lpFile, *file, *file1, *file2, *file3, *info;
@@ -40,7 +41,9 @@ char *argv[];
 	
 	int nodes[7]={0,1,2,3,4,5,6};
 	int request[2][2];
-	int disaster[2], ds, l, m, k, temp = 0, counterx = 0; 
+	int a1 = 0, b1 = 0, c1 = 0, a2 = 0, b2 = 0, c2 = 0;
+	int disaster[D], a, b, bb, l, m, k, temp = 0, counterx = 0; 
+	int size=M;
 	int edgesArray[N][N]={0};
 	int primaryInfo[R][N];
 	int c[E][K]={0};
@@ -79,6 +82,7 @@ char *argv[];
       
 	fclose (inputFile);
 	
+		
 	if((file1=fopen("edgesNumbers.txt","r"))==NULL)
 	{	printf("Input file can not be opened.\n");
 		exit(2);
@@ -91,6 +95,18 @@ char *argv[];
 	fclose (file1);
 
 	sprintf(lpFileName, "lpFile.txt");
+	
+	//print edge array to make sure it's getting true values
+	
+	for(i=0;i<N;i++)
+	{
+		for (j = 0; j < N; j++)
+		{
+			printf("%d ", edgesArray[i][j]);
+		}
+		printf("\n");
+	}
+	
 	
 	if((file=fopen("PrimaryInfo.txt","r"))==NULL)
 	{	printf("PrimaryInfo file can not be opened.\n");
@@ -130,18 +146,18 @@ char *argv[];
 		printf("error\n");
 		return 1;
 	 }
-	 for (i=0;i<ds;i++)
+	 for (i=0;i<D;i++)
 	 {
 		 disaster[i]= -1;
 	 }
-	 for (i=0;i<ds;i++)
+	 for (i=0;i<D;i++)
 	 {
 		fscanf(file3, "%d", &disaster[i]);
 	 }
 	 fclose(file3);
 	
 	// Debugging disaster//
-	 for (i=0;i<ds;i++)
+	 for (i=0;i<D;i++)
 	 {
 		printf("%d ", disaster[i]);
 		printf("\n");
@@ -494,6 +510,7 @@ char *argv[];
 				ch = colname[0];
                 
 				//if(flag ==1)  //primary work
+
 				if (ch == 'w' || ch == 'U')
 					fprintf(outFile, "%-16s= %f\n", cur_colname[num],value[num]);
 				
@@ -518,19 +535,33 @@ char *argv[];
 					j=atoi(s1);
 					fprintf(outFile, "Lightpath %d uses the link %d-->%d\n", l, i, j);
 				
+					//duplicate =0;
 					if(temp!=l)
+					{
+						counterx = 0;
+					}
+					if (i!= primaryInfo[l][counterx] && counterx>0)
+					{
+						for(a=0; a<counterx; a++)
 						{
-							counterx = 0;
+							if(i==primaryInfo[l][a])
+							{
+								//duplicate = 1;
+								goto END;
+							}
 						}
+						counterx++;
+					}	
+										
 					primaryInfo[l][counterx] = i;
 					primaryInfo[l][counterx+1] = j;
-					fprintf(info,"%d ",primaryInfo[l][k]);
-					//printf("%d ",primaryInfo[l][k]);
-					
 					counterx++;
+					
+					END:
 					temp = l;
 				
 				}
+				printf("\n");
 				
 				if( ch == 'V')
 				{
@@ -547,9 +578,9 @@ char *argv[];
 					strcpy(s1,"");
 					strcat(s1,tokenPtr);
 					j=atoi(s1);
-					fprintf(outFile, "Lightpath %d uses channel %d\n", i, j);
+					fprintf(outFile, "Channel %d is used by Lightpath %d \n", i, j);
 					
-					primaryInfo[i][6]=j;
+					primaryInfo[j][6]=i;
 				}
 			
 			}/*end of value==1*/
@@ -564,6 +595,58 @@ char *argv[];
 		}
 		printf("\n");
 	}		
+	
+
+	for(i=0;i<R;i++)
+	{
+		for(j=0;j<N;j++)
+		{
+			if(primaryInfo[i][j] != -1 && j<6)
+			{
+				a1 = primaryInfo[i][j];
+				b1 = primaryInfo[i][j+1]; 
+				c1 = primaryInfo[i][6];
+				
+				a2 = edgesArray[a1][b1];
+				printf("%d ",a2);
+				c[a2][c1] = 1;
+			}
+		}
+		
+	}
+	
+	for(i=0;i<E;i++)
+	{
+		for (j = 0; j < K; j++)
+		{
+			printf("%d ", c[i][j]);
+		}
+		printf("\n");
+	}
+	
+	for(i=0;i<D;i++)
+	{
+		temp = disaster[i];
+		
+		for(a=0; a<N; a++)
+		{
+			topologyp[a][temp] = 0;
+			for(b=0; b<N; b++)
+			{
+				topologyp[temp][b] = 0;
+			}
+		}
+	}
+	
+	for(i=0;i<N;i++)
+	{
+		for(j=0;j<N;j++)
+		{
+			printf("%d ", topologyp[i][j]);
+		}
+		printf("\n");
+	}
+	
 	
 	fclose(info);
 	fclose(outFile);
