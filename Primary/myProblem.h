@@ -25,4 +25,4 @@ CPXLPptr lp;
 #define OR 1000  // Optical reach
 #define K 4 	 // No of Channels
 #define R 5 	 // No of requests
-#define D 2 	 // No of disasters 
+#define D 1 	 // No of disasters 
