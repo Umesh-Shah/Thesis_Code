@@ -1,0 +1,44 @@
+Objective value = 2.000000
+Solution time = 2.440 s
+w_2             = 1.000000
+w_5             = 1.000000
+
+X_0_0_2: P. LP 0 uses the link 0-->2
+
+X_0_2_3: P. LP 0 uses the link 2-->3
+
+X_1_0_5: P. LP 1 uses the link 0-->5
+
+X_2_0_2: P. LP 2 uses the link 0-->2
+
+X_2_1_4: P. LP 2 uses the link 1-->4
+
+X_2_2_1: P. LP 2 uses the link 2-->1
+
+X_3_0_5: P. LP 3 uses the link 0-->5
+
+X_3_3_6: P. LP 3 uses the link 3-->6
+
+X_3_5_3: P. LP 3 uses the link 5-->3
+
+X_4_0_2: P. LP 4 uses the link 0-->2
+
+V_0_2: Channel 0 is used by P. LP 2 
+
+V_0_3: Channel 0 is used by P. LP 3 
+
+V_2_4: Channel 2 is used by P. LP 4 
+
+V_3_0: Channel 3 is used by P. LP 0 
+
+V_3_1: Channel 3 is used by P. LP 1 
+U_0_2_0_2       = 1.000000
+U_0_2_1_4       = 1.000000
+U_0_2_2_1       = 1.000000
+U_0_3_0_5       = 1.000000
+U_0_3_3_6       = 1.000000
+U_0_3_5_3       = 1.000000
+U_2_4_0_2       = 1.000000
+U_3_0_0_2       = 1.000000
+U_3_0_2_3       = 1.000000
+U_3_1_0_5       = 1.000000

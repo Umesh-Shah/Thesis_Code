@@ -1,0 +1,50 @@
+Objective value = 2.000000
+Solution time = 1.563 s
+w_2             = 1.000000
+w_4             = 1.000000
+
+X_0_0_4: B. LP 0 uses the link 0-->4
+
+X_0_2_3: B. LP 0 uses the link 2-->3
+
+X_0_4_2: B. LP 0 uses the link 4-->2
+
+X_1_0_4: B. LP 1 uses the link 0-->4
+
+X_1_4_5: B. LP 1 uses the link 4-->5
+
+X_2_0_4: B. LP 2 uses the link 0-->4
+
+X_3_0_4: B. LP 3 uses the link 0-->4
+
+X_3_4_5: B. LP 3 uses the link 4-->5
+
+X_3_5_6: B. LP 3 uses the link 5-->6
+
+X_4_0_2: B. LP 4 uses the link 0-->2
+
+X_4_2_4: B. LP 4 uses the link 2-->4
+
+X_4_4_2: B. LP 4 uses the link 4-->2
+
+V_0_3: Channel 0 is used by B. LP 3 
+
+V_1_1: Channel 1 is used by B. LP 1 
+
+V_2_0: Channel 2 is used by B. LP 0 
+
+V_3_2: Channel 3 is used by B. LP 2 
+
+V_3_4: Channel 3 is used by B. LP 4 
+U_0_3_0_4       = 1.000000
+U_0_3_4_5       = 1.000000
+U_0_3_5_6       = 1.000000
+U_1_1_0_4       = 1.000000
+U_1_1_4_5       = 1.000000
+U_2_0_0_4       = 1.000000
+U_2_0_2_3       = 1.000000
+U_2_0_4_2       = 1.000000
+U_3_2_0_4       = 1.000000
+U_3_4_0_2       = 1.000000
+U_3_4_2_4       = 1.000000
+U_3_4_4_2       = 1.000000
